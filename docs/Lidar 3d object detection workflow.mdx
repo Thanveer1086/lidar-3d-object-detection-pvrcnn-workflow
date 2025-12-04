@@ -62,8 +62,6 @@ kitti/
     └── image_2/
 ```
 
-<img src="./images/folder-structure.png" alt="KITTI Folder Structure" />
-
 <Callout type="info">
 **Dataset Split Information:**
 The folder structure is critical for LiDAR training. To split the dataset into train, test, and val sets, use the **ImageSets** folder. This folder contains text files listing sample IDs. When creating your own split, include **only the selected sample IDs** in the corresponding train, val, or test text files.
@@ -161,10 +159,10 @@ Predictions are saved in the `output/` folder.
 
 ### Sample Input (RGB Image)
 
-<img src="./images/sample-input.png" alt="Sample Input - Street Scene with Vehicles" />
+<img src="/img/000008.png" alt="Sample Input - Street Scene with Vehicles" />
 
 ### Detection Output (3D Point Cloud with Bounding Boxes)
 
-<img src="./images/detection-output.png" alt="3D Object Detection Output showing detected vehicles with bounding boxes" />
+<img src="/img/ScreenCapture_2025-12-03-12-38-03.png" alt="3D Object Detection Output showing detected vehicles with bounding boxes" />
 
 The output shows the LiDAR point cloud with predicted 3D bounding boxes around detected objects. Different colors represent different object classes or confidence levels.
