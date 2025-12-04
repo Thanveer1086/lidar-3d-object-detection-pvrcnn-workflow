@@ -1,0 +1,613 @@
+---
+title: 'LiDAR 3D Object Detection Workflow'
+description: Complete guide for LiDAR-based 3D Object Detection using OpenPCDet with KITTI dataset
+icon: Radar
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<div className="flex justify-end mb-4">
+  <div className="px-4 py-2 rounded-full bg-blue-500 text-white font-bold text-sm">
+    ⏱️ 45-60 minutes setup
+  </div>
+</div>
+
+## For Non-Technical People
+
+<Callout type="info">
+  Imagine teaching a self-driving car to "see" the world using laser beams! LiDAR sensors shoot millions of laser points to create a 3D map of everything around the car. This workflow teaches an AI to look at those laser points and identify objects like cars, pedestrians, and cyclists.
+
+  **Real-world use cases:** Self-driving cars, autonomous robots, drone navigation, warehouse automation, smart city surveillance.
+</Callout>
+
+## For Technical People
+
+<div className="p-6 rounded-lg bg-blue-500/10 border-l-4 border-blue-500 my-6">
+  <div className="mb-4">
+    This workflow implements 3D object detection on LiDAR point clouds using OpenPCDet framework. We'll use the KITTI benchmark dataset and train models like PV-RCNN, PointPillars, or SECOND to predict 3D bounding boxes with class labels.
+  </div>
+  <div>
+    <strong>Technical Details:</strong>
+    <ul className="mt-2 ml-4 list-disc">
+      <li><strong>Framework:</strong> OpenPCDet (PyTorch-based)</li>
+      <li><strong>Dataset:</strong> KITTI 3D Object Detection Benchmark</li>
+      <li><strong>Models Supported:</strong> PV-RCNN, PointPillars, SECOND, Part-A², CenterPoint</li>
+      <li><strong>Metrics:</strong> 3D mAP, BEV mAP at IoU 0.7/0.5</li>
+    </ul>
+  </div>
+</div>
+
+---
+
+## Complete Workflow Overview
+
+<img src="/images/workflow-overview.svg" alt="LiDAR Workflow Overview" className="w-full rounded-lg my-6" />
+
+---
+
+## 1. Prerequisites
+
+### System Requirements
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+  <div className="p-4 rounded-lg bg-gray-500/10 border border-gray-500/20">
+    <div className="font-bold text-gray-300 mb-2">💻 Hardware</div>
+    <ul className="text-sm text-muted-foreground space-y-1">
+      <li>• NVIDIA GPU (Required)</li>
+      <li>• 8GB+ VRAM recommended</li>
+      <li>• 32GB+ System RAM</li>
+      <li>• 100GB+ Storage for dataset</li>
+    </ul>
+  </div>
+  <div className="p-4 rounded-lg bg-gray-500/10 border border-gray-500/20">
+    <div className="font-bold text-gray-300 mb-2">🐧 Operating System</div>
+    <ul className="text-sm text-muted-foreground space-y-1">
+      <li>• Ubuntu 14.04 / 16.04 / 18.04</li>
+      <li>• Ubuntu 20.04 / 21.04</li>
+      <li>• Other Linux distributions</li>
+      <li>• WSL2 (Windows) - Limited support</li>
+    </ul>
+  </div>
+</div>
+
+### Software Dependencies
+
+| Component | Version | Notes |
+|-----------|---------|-------|
+| Python | 3.6+ | **3.8 recommended** for best compatibility |
+| PyTorch | 1.1+ | Versions 1.3–1.10 tested |
+| CUDA | 9.0+ | PyTorch 1.3+ requires CUDA 9.2+ |
+| cuDNN | 7.0+ | Must match CUDA version |
+| spconv | v1.0 / v1.2 / v2.x | [GitHub Repository](https://github.com/traveller59/spconv) |
+| OpenPCDet | Latest | [GitHub Repository](https://github.com/open-mmlab/OpenPCDet) |
+
+### Version Compatibility Matrix 
+
+<Callout type="info">Examples </Callout>
+
+<img src="/images/version-compatibility.svg" alt="LiDAR Workflow Overview" className="w-full rounded-lg my-6" />
+
+<Callout type="warn">
+  **Critical Compatibility Notes:**
+  - **CUDA and PyTorch versions must match exactly.** Mismatched versions cause installation or runtime errors.
+  - **spconv** is version-sensitive — only use supported versions with your CUDA/PyTorch combination.
+  - Newer Python versions (3.9+) often cause compatibility issues with LiDAR frameworks.
+</Callout>
+
+### Installation Steps
+
+```bash title="install_dependencies.sh"
+# Step 1: Create conda environment
+conda create -n openpcdet python=3.8 -y
+conda activate openpcdet
+
+# Step 2: Install PyTorch (adjust for your CUDA version)
+# For CUDA 11.3:
+pip install torch==1.10.0+cu113 torchvision==0.11.0+cu113 -f https://download.pytorch.org/whl/torch_stable.html
+
+# Step 3: Install spconv
+pip install spconv-cu113  # Match your CUDA version
+
+# Step 4: Clone and install OpenPCDet
+git clone https://github.com/open-mmlab/OpenPCDet.git
+cd OpenPCDet
+pip install -r requirements.txt
+python setup.py develop
+
+# Step 5: Verify installation
+python -c "import torch; print(f'PyTorch: {torch.__version__}, CUDA: {torch.cuda.is_available()}')"
+```
+
+---
+
+## 2. Dataset Preparation
+
+### About KITTI Dataset
+
+<Callout type="info">
+  The **KITTI 3D Object Detection Dataset** is the most widely used LiDAR benchmark, fully supported by almost all 3D detection frameworks. It contains synchronized LiDAR point clouds, camera images, and 3D annotations for autonomous driving research.
+</Callout>
+
+### Dataset Statistics
+
+<div className="grid grid-cols-2 md:grid-cols-4 gap-4 my-6">
+  <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 text-center">
+    <div className="text-3xl font-bold text-blue-400">7,481</div>
+    <div className="text-sm text-muted-foreground">Training Samples</div>
+  </div>
+  <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20 text-center">
+    <div className="text-3xl font-bold text-green-400">7,518</div>
+    <div className="text-sm text-muted-foreground">Testing Samples</div>
+  </div>
+  <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-center">
+    <div className="text-3xl font-bold text-yellow-400">80,256</div>
+    <div className="text-sm text-muted-foreground">Labeled Objects</div>
+  </div>
+  <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/20 text-center">
+    <div className="text-3xl font-bold text-purple-400">3</div>
+    <div className="text-sm text-muted-foreground">Object Classes</div>
+  </div>
+</div>
+
+### Download Required Files
+
+Download from the [KITTI Dataset Page](https://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=3d):
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+  <div className="p-4 rounded-lg bg-green-500/10 border-l-4 border-green-500">
+    <div className="font-bold text-green-400 mb-2">✅ Required Downloads</div>
+    <ul className="text-sm text-muted-foreground space-y-1">
+      <li>• <strong>Velodyne point clouds</strong> (29 GB)</li>
+      <li>• <strong>Training labels</strong> (5 MB)</li>
+      <li>• <strong>Calibration files</strong> (16 MB)</li>
+    </ul>
+  </div>
+  <div className="p-4 rounded-lg bg-yellow-500/10 border-l-4 border-yellow-500">
+    <div className="font-bold text-yellow-400 mb-2">📦 Optional Downloads</div>
+    <ul className="text-sm text-muted-foreground space-y-1">
+      <li>• Camera images - left color (12 GB)</li>
+      <li>• Camera images - right color (12 GB)</li>
+      <li>• Depth maps (3 GB)</li>
+    </ul>
+  </div>
+</div>
+
+### Data Download Flow
+
+<img src="/images/data-download-flow.svg" alt="LiDAR Workflow Overview" className="w-full rounded-lg my-6" />
+
+### Required Folder Structure
+
+```plaintext
+OpenPCDet/
+└── data/
+    └── kitti/
+        ├── ImageSets/
+        │   ├── train.txt        # Training sample IDs
+        │   ├── val.txt          # Validation sample IDs  
+        │   ├── test.txt         # Test sample IDs
+        │   └── trainval.txt     # Combined train+val IDs
+        ├── training/
+        │   ├── calib/           # 7481 calibration files
+        │   │   ├── 000000.txt
+        │   │   ├── 000001.txt
+        │   │   └── ...
+        │   ├── velodyne/        # 7481 point cloud files
+        │   │   ├── 000000.bin
+        │   │   ├── 000001.bin
+        │   │   └── ...
+        │   ├── label_2/         # 7481 annotation files
+        │   │   ├── 000000.txt
+        │   │   ├── 000001.txt
+        │   │   └── ...
+        │   ├── image_2/         # 7481 RGB images
+        │   ├── planes/          # Road plane data (optional)
+        │   └── depth_2/         # Depth maps (optional)
+        ├── testing/
+        │   ├── calib/           # 7518 calibration files
+        │   ├── velodyne/        # 7518 point cloud files
+        │   └── image_2/         # 7518 RGB images
+        └── kitti_infos_train.pkl    # Generated by data preparation
+```
+
+<Callout type="warn">
+  **Important:** The folder structure is critical for LiDAR training. To create custom train/val/test splits, use the **ImageSets** folder. Each text file should contain only the sample IDs (e.g., `000001`, `000002`) for that split.
+</Callout>
+
+### File Format Reference
+
+<div className="overflow-x-auto my-6">
+  <table className="w-full text-sm">
+    <thead>
+      <tr className="border-b border-gray-700">
+        <th className="text-left p-3">File Type</th>
+        <th className="text-left p-3">Location</th>
+        <th className="text-left p-3">Format</th>
+        <th className="text-left p-3">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr className="border-b border-gray-800">
+        <td className="p-3 font-mono text-blue-400">*.bin</td>
+        <td className="p-3 text-muted-foreground">velodyne/</td>
+        <td className="p-3 text-muted-foreground">Binary float32</td>
+        <td className="p-3 text-muted-foreground">Point cloud (x, y, z, intensity) - ~120K points/frame</td>
+      </tr>
+      <tr className="border-b border-gray-800">
+        <td className="p-3 font-mono text-green-400">*.txt</td>
+        <td className="p-3 text-muted-foreground">label_2/</td>
+        <td className="p-3 text-muted-foreground">Space-separated</td>
+        <td className="p-3 text-muted-foreground">3D annotations (class, bbox, dimensions, location, rotation)</td>
+      </tr>
+      <tr className="border-b border-gray-800">
+        <td className="p-3 font-mono text-yellow-400">*.txt</td>
+        <td className="p-3 text-muted-foreground">calib/</td>
+        <td className="p-3 text-muted-foreground">Matrix format</td>
+        <td className="p-3 text-muted-foreground">Projection matrices (P0-P3, R0_rect, Tr_velo_to_cam)</td>
+      </tr>
+      <tr className="border-b border-gray-800">
+        <td className="p-3 font-mono text-purple-400">*.png</td>
+        <td className="p-3 text-muted-foreground">image_2/</td>
+        <td className="p-3 text-muted-foreground">PNG RGB</td>
+        <td className="p-3 text-muted-foreground">Left color camera images (1242×375 pixels)</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+### Label Format Explained
+
+```plaintext title="Example: 000008.txt"
+Car 0.00 0 -1.57 599.41 156.40 629.75 189.25 1.48 1.60 3.69 2.02 1.64 39.70 -1.59
+│   │    │  │     └─────────────────────────┘ └──────────────┘ └────────────────┘
+│   │    │  │              2D BBox              Dimensions       Location + ry
+│   │    │  └── Alpha (observation angle)
+│   │    └── Occluded (0=visible, 1=partly, 2=fully)
+│   └── Truncated (0.0-1.0)
+└── Class name
+```
+
+### Data Preparation Commands
+
+```bash title="prepare_data.sh"
+# Navigate to OpenPCDet directory
+cd OpenPCDet
+
+# Generate data infos (creates .pkl files)
+python -m pcdet.datasets.kitti.kitti_dataset create_kitti_infos \
+    tools/cfgs/dataset_configs/kitti_dataset.yaml
+
+# This creates:
+# - kitti_infos_train.pkl
+# - kitti_infos_val.pkl  
+# - kitti_infos_trainval.pkl
+# - kitti_infos_test.pkl
+# - kitti_dbinfos_train.pkl (for GT sampling augmentation)
+```
+
+---
+
+## 3. Understanding the Models
+
+### Model Architecture Comparison
+
+<img src="/images/model-architecture.svg" alt="LiDAR Workflow Overview" className="w-full rounded-lg my-6" />
+
+### Model Selection Guide
+
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+  <div className="p-5 rounded-lg bg-green-500/10 border border-green-500/30">
+    <div className="text-xl font-bold text-green-400 mb-2">⚡ PointPillars</div>
+    <div className="text-sm text-muted-foreground mb-3">Best for: Real-time applications</div>
+    <ul className="text-sm text-muted-foreground space-y-1">
+      <li> Speed: <strong>~50 FPS</strong></li>
+      <li> 3D mAP: ~77%</li>
+      <li> Memory: 2-3 GB</li>
+      <li> Training: ~4 hours</li>
+    </ul>
+    <div className="mt-3 text-xs text-green-500">✓ Recommended for edge devices</div>
+  </div>
+  
+  <div className="p-5 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
+    <div className="text-xl font-bold text-yellow-400 mb-2">⚖️ SECOND</div>
+    <div className="text-sm text-muted-foreground mb-3">Best for: Balanced performance</div>
+    <ul className="text-sm text-muted-foreground space-y-1">
+      <li> Speed: <strong>~25 FPS</strong></li>
+      <li> 3D mAP: ~81%</li>
+      <li> Memory: 4-5 GB</li>
+      <li> Training: ~8 hours</li>
+    </ul>
+    <div className="mt-3 text-xs text-yellow-500">✓ Good speed-accuracy tradeoff</div>
+  </div>
+  
+  <div className="p-5 rounded-lg bg-blue-500/10 border border-blue-500/30">
+    <div className="text-xl font-bold text-blue-400 mb-2">🎯 PV-RCNN</div>
+    <div className="text-sm text-muted-foreground mb-3">Best for: Maximum accuracy</div>
+    <ul className="text-sm text-muted-foreground space-y-1">
+      <li> Speed: <strong>~10 FPS</strong></li>
+      <li> 3D mAP: ~84%</li>
+      <li> Memory: 6-8 GB</li>
+      <li> Training: ~20 hours</li>
+    </ul>
+    <div className="mt-3 text-xs text-blue-500">✓ State-of-the-art accuracy</div>
+  </div>
+</div>
+
+---
+
+## 4. Training Pipeline
+
+### Training Workflow Diagram
+
+<img src="/images/training-workflow.svg" alt="LiDAR Workflow Overview" className="w-full rounded-lg my-6" />
+
+### Training Commands
+
+```bash title="train_models.sh"
+# ============================================
+# Train PV-RCNN (Best Accuracy)
+# ============================================
+python train.py \
+    --cfg_file cfgs/kitti_models/pv_rcnn.yaml \
+    --batch_size 2 \
+    --epochs 80 \
+    --workers 4
+
+# ============================================
+# Train PointPillars (Fastest)
+# ============================================
+python train.py \
+    --cfg_file cfgs/kitti_models/pointpillar.yaml \
+    --batch_size 4 \
+    --epochs 80 \
+    --workers 4
+
+# ============================================
+# Train SECOND (Balanced)
+# ============================================
+python train.py \
+    --cfg_file cfgs/kitti_models/second.yaml \
+    --batch_size 4 \
+    --epochs 80 \
+    --workers 4
+
+# ============================================
+# Multi-GPU Training (Distributed)
+# ============================================
+CUDA_VISIBLE_DEVICES=0,1,2,3 python -m torch.distributed.launch \
+    --nproc_per_node=4 \
+    train.py \
+    --cfg_file cfgs/kitti_models/pv_rcnn.yaml \
+    --batch_size 8 \
+    --launcher pytorch
+```
+
+### Loss Functions
+
+<img src="/images/loss-functions.svg" alt="LiDAR Workflow Overview" className="w-full rounded-lg my-6" />
+
+
+### Evaluation Metrics
+
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+  <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 text-center">
+    <div className="text-2xl font-bold text-blue-400">3D mAP</div>
+    <div className="text-sm text-muted-foreground">Mean Average Precision in 3D space</div>
+    <div className="mt-2 text-xs text-muted-foreground">Measured at IoU=0.7 for cars</div>
+  </div>
+  <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20 text-center">
+    <div className="text-2xl font-bold text-green-400">BEV mAP</div>
+    <div className="text-sm text-muted-foreground">Bird's Eye View precision</div>
+    <div className="mt-2 text-xs text-muted-foreground">2D projection accuracy</div>
+  </div>
+  <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-center">
+    <div className="text-2xl font-bold text-yellow-400">IoU Threshold</div>
+    <div className="text-sm text-muted-foreground">Intersection over Union</div>
+    <div className="mt-2 text-xs text-muted-foreground">0.7 (cars) / 0.5 (ped/cyc)</div>
+  </div>
+</div>
+
+### Training Monitoring
+
+```bash title="monitor_training.sh"
+# Launch TensorBoard to monitor training
+tensorboard --logdir output/kitti_models/pv_rcnn/default/tensorboard --port 6006
+
+# View in browser: http://localhost:6006
+```
+
+<div className="p-4 rounded-lg bg-purple-500/10 border-l-4 border-purple-500 my-6">
+  <div className="font-bold text-purple-400 mb-2">📊 Metrics to Monitor</div>
+  <ul className="text-sm text-muted-foreground space-y-1">
+    <li>• <strong>train/loss</strong> - Should decrease steadily</li>
+    <li>• <strong>train/cls_loss</strong> - Classification loss</li>
+    <li>• <strong>train/loc_loss</strong> - Localization loss</li>
+    <li>• <strong>val/Car_3d_moderate</strong> - Primary metric for KITTI</li>
+    <li>• <strong>learning_rate</strong> - Should follow OneCycle schedule</li>
+  </ul>
+</div>
+
+---
+
+## 5. Inference Workflow
+
+### Inference Pipeline
+
+<img src="/images/inference-pipeline.svg" alt="Inference Pipeline" className="w-full rounded-lg my-6" />
+
+### Running Inference
+
+```bash title="run_inference.sh"
+# Single File Inference
+python demo.py \
+    --cfg_file cfgs/kitti_models/pv_rcnn.yaml \
+    --ckpt output/kitti_models/pv_rcnn/default/ckpt/checkpoint_epoch_80.pth \
+    --data_path data/kitti/training/velodyne/000008.bin
+
+# Batch Inference on Folder
+python demo.py \
+    --cfg_file cfgs/kitti_models/pv_rcnn.yaml \
+    --ckpt output/kitti_models/pv_rcnn/default/ckpt/checkpoint_epoch_80.pth \
+    --data_path data/kitti/training/velodyne/ \
+    --ext .bin
+```
+
+<Callout type="info">
+  Visualize detection results using **Open3D** or **Matplotlib**. Both require a GPU for rendering 3D point clouds efficiently.
+</Callout>
+
+<Callout type="warn">
+  **Google Colab Limitation:** Colab does not directly support 3D visualization. For interactive 3D viewing, run the code on a local machine with GPU support.
+</Callout>
+
+---
+
+## 6. Testing Pipeline
+
+### Run Evaluation
+
+```bash title="test_model.sh"
+# Evaluate on Validation Set
+python test.py \
+    --cfg_file cfgs/kitti_models/pv_rcnn.yaml \
+    --batch_size 4 \
+    --ckpt output/kitti_models/pv_rcnn/default/ckpt/checkpoint_epoch_80.pth
+
+# Generate Test Set Predictions (for KITTI submission)
+python test.py \
+    --cfg_file cfgs/kitti_models/pv_rcnn.yaml \
+    --batch_size 1 \
+    --ckpt output/kitti_models/pv_rcnn/default/ckpt/checkpoint_epoch_80.pth \
+    --save_to_file
+```
+
+### Expected Results
+
+<div className="overflow-x-auto my-6">
+  <table className="w-full text-sm">
+    <thead>
+      <tr className="border-b border-gray-700">
+        <th className="text-left p-3">Model</th>
+        <th className="text-center p-3">Car (Easy)</th>
+        <th className="text-center p-3">Car (Mod)</th>
+        <th className="text-center p-3">Car (Hard)</th>
+        <th className="text-center p-3">FPS</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr className="border-b border-gray-800">
+        <td className="p-3 font-mono text-green-400">PointPillars</td>
+        <td className="p-3 text-center">87.75</td>
+        <td className="p-3 text-center">78.39</td>
+        <td className="p-3 text-center">75.18</td>
+        <td className="p-3 text-center">~50</td>
+      </tr>
+      <tr className="border-b border-gray-800">
+        <td className="p-3 font-mono text-yellow-400">SECOND</td>
+        <td className="p-3 text-center">90.31</td>
+        <td className="p-3 text-center">81.62</td>
+        <td className="p-3 text-center">79.33</td>
+        <td className="p-3 text-center">~25</td>
+      </tr>
+      <tr className="border-b border-gray-800">
+        <td className="p-3 font-mono text-blue-400">PV-RCNN</td>
+        <td className="p-3 text-center text-blue-400 font-bold">92.10</td>
+        <td className="p-3 text-center text-blue-400 font-bold">84.36</td>
+        <td className="p-3 text-center text-blue-400 font-bold">82.48</td>
+        <td className="p-3 text-center">~10</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+---
+
+## 7. Example Results
+
+<div className="grid grid-cols-1 md:grid-cols-1 gap-6 my-8">
+  <div className="p-6 rounded-lg bg-gradient-to-br from-gray-900 to-gray-800">
+    <div className="text-gray-300 font-bold mb-4">📷 INPUT: RGB Camera Image</div>
+    <img src="/images/000008.png" alt="Sample Input - Street Scene" className="rounded-lg mb-3 w-full" />
+    <div className="text-gray-500 text-sm">Street scene with multiple vehicles captured by KITTI dataset camera</div>
+  </div>
+
+  <div className="p-6 rounded-lg bg-gradient-to-br from-green-900 to-green-800">
+    <div className="text-green-300 font-bold mb-4">🎯 OUTPUT: 3D Detection Results</div>
+    <img src="/images/ScreenCapture_2025-12-03-12-38-03.png" alt="3D Detection Output" className="rounded-lg mb-3 w-full" />
+    <div className="text-green-500 text-sm">LiDAR point cloud with predicted 3D bounding boxes</div>
+  </div>
+</div>
+
+---
+
+## 8. Common Issues & Troubleshooting
+
+
+### Common Errors & Solutions
+
+<div className="space-y-4 my-6">
+  <div className="p-4 rounded-lg bg-red-500/10 border-l-4 border-red-500">
+    <div className="font-mono text-red-400 text-sm mb-2">RuntimeError: CUDA out of memory</div>
+    <div className="text-sm text-muted-foreground">
+      <strong>Solution:</strong> Reduce batch_size to 1 or 2, or reduce POINT_CLOUD_RANGE in config.
+    </div>
+  </div>
+  
+  <div className="p-4 rounded-lg bg-red-500/10 border-l-4 border-red-500">
+    <div className="font-mono text-red-400 text-sm mb-2">ImportError: cannot import name 'spconv'</div>
+    <div className="text-sm text-muted-foreground">
+      <strong>Solution:</strong> Install correct spconv version: <code>pip install spconv-cu113</code>
+    </div>
+  </div>
+  
+  <div className="p-4 rounded-lg bg-red-500/10 border-l-4 border-red-500">
+    <div className="font-mono text-red-400 text-sm mb-2">FileNotFoundError: kitti_infos_train.pkl</div>
+    <div className="text-sm text-muted-foreground">
+      <strong>Solution:</strong> Run data preparation script first.
+    </div>
+  </div>
+</div>
+
+---
+
+## 9. Important Notes
+
+<div className="p-6 rounded-lg bg-red-500/10 border-l-4 border-red-500 my-6">
+  <div className="font-bold text-red-400 mb-3">⚠️ Critical Reminders</div>
+  <ul className="list-disc ml-6 space-y-2 text-muted-foreground">
+    <li>Always keep <strong>CUDA, PyTorch, and spconv versions compatible</strong></li>
+    <li><strong>File naming and folder structure are critical</strong></li>
+    <li><strong>GPU is mandatory</strong> for training, inference, and visualization</li>
+    <li>Monitor GPU memory — reduce batch size for OOM errors</li>
+  </ul>
+</div>
+
+---
+
+## Key Takeaway
+
+<Callout title="Key Takeaway" type="info">
+  LiDAR 3D object detection transforms raw point clouds into actionable perception data for autonomous systems. The key to success: **proper environment setup**, **correct dataset structure**, and **appropriate model selection**. Start with PointPillars for speed or PV-RCNN for accuracy.
+</Callout>
+
+---
+
+## Try This Challenge
+
+<div className="p-6 rounded-lg bg-blue-500/10 border-l-4 border-blue-500 my-6">
+  <div className="font-bold text-blue-500 mb-3">🚀 Try These Challenges:</div>
+  <ol className="list-decimal ml-6 space-y-2 text-muted-foreground">
+    <li>Compare PointPillars vs PV-RCNN speed/accuracy</li>
+    <li>Create custom train/val split with 100 samples</li>
+    <li>Train only on "Car" class</li>
+    <li>Export model to ONNX format</li>
+  </ol>
+</div>
+
+---
+
+## Next Steps
+
+- [OpenPCDet GitHub](https://github.com/open-mmlab/OpenPCDet) — Official documentation
+- [KITTI Leaderboard](https://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=3d) — Compare results
+- [SpConv Guide](https://github.com/traveller59/spconv) — Troubleshoot issues
