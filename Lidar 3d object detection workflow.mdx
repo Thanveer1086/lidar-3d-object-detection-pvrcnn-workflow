@@ -1,0 +1,170 @@
+# LiDAR 3D Object Detection Workflow
+
+This guide provides a complete workflow for LiDAR-based 3D Object Detection using OpenPCDet, covering environment setup, dataset preparation, training, inference, and testing.
+
+---
+
+## 1. Prerequisites
+
+### System Requirements
+
+- **Operating System:** Linux (Ubuntu 14.04 / 16.04 / 18.04 / 20.04 / 21.04)
+- **Python:** 3.6+ (Python 3.8 recommended)
+- **PyTorch:** 1.1 or higher (1.3–1.10 recommended)
+- **CUDA:** 9.0+ (PyTorch 1.3+ requires CUDA 9.2+)
+- **GPU:** Required for training and inference
+- **spconv:** v1.0 / v1.2 / v2.x ([GitHub Repository](https://github.com/traveller59/spconv))
+
+<Callout type="warning">
+**Important Compatibility Notes:**
+- Most LiDAR 3D detection frameworks work best with **Python 3.8**. Newer Python versions often cause compatibility errors.
+- **CUDA and PyTorch versions must match exactly.** Mismatched versions will cause installation or runtime errors.
+- **spconv** is version-sensitive—only use supported versions.
+- A **GPU is required** for training and inference. Cloud platforms like Google Colab may have limitations.
+</Callout>
+
+---
+
+## 2. Dataset Preparation
+
+### Dataset Used
+
+This workflow uses the **KITTI 3D Object Detection Dataset**, the most widely used LiDAR benchmark that is fully supported by almost all 3D detection frameworks.
+
+### Download the Dataset
+
+Download the following components from the [KITTI Dataset Page](https://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=3d):
+
+- Velodyne point clouds
+- Label files (`label_2`)
+- Calibration files (`calib`)
+- Camera images (`image_2`) — optional but recommended
+- Train/val split file — if needed
+
+### Required Folder Structure
+
+```
+kitti/
+├── ImageSets/
+│   ├── train.txt
+│   ├── val.txt
+│   └── test.txt
+├── training/
+│   ├── calib/
+│   ├── velodyne/
+│   ├── label_2/
+│   ├── image_2/
+│   ├── planes/         (optional)
+│   └── depth_2/        (optional)
+└── testing/
+    ├── calib/
+    ├── velodyne/
+    └── image_2/
+```
+
+<img src="./images/folder-structure.png" alt="KITTI Folder Structure" />
+
+<Callout type="info">
+**Dataset Split Information:**
+The folder structure is critical for LiDAR training. To split the dataset into train, test, and val sets, use the **ImageSets** folder. This folder contains text files listing sample IDs. When creating your own split, include **only the selected sample IDs** in the corresponding train, val, or test text files.
+</Callout>
+
+### File Format Explanation
+
+| File Type | Location | Description |
+|-----------|----------|-------------|
+| `velodyne/*.bin` | `training/velodyne/` | Raw LiDAR point clouds in binary format (x, y, z, intensity) |
+| `label_2/*.txt` | `training/label_2/` | 3D box annotations — class, dimensions, location, rotation |
+| `calib/*.txt` | `training/calib/` | Transformation matrices to align LiDAR and camera data |
+| `image_2/*.png` | `training/image_2/` | RGB images corresponding to each frame (optional for LiDAR-only models) |
+
+---
+
+## 3. Training Pipeline
+
+### Training Steps
+
+1. Set the correct **dataset path** in the model's configuration file
+2. Select the **model configuration** you want to train (PointPillars, SECOND, PV-RCNN, etc.)
+3. The pipeline loads data and applies **data augmentation** automatically
+4. The model backbone and network layers are **initialized and moved to GPU**
+5. Start training using the command below
+6. The trainer performs forward pass, computes loss, backpropagation, and updates weights
+7. Logs are saved in the output folder; monitor via TensorBoard
+8. Model checkpoints are saved periodically
+
+### Training Command
+
+```bash
+python train.py --cfg_file cfgs/kitti_models/pv_rcnn.yaml
+```
+
+### Validation Metrics
+
+- **3D mAP** — Mean Average Precision in 3D
+- **BEV mAP** — Bird's Eye View Mean Average Precision
+- **IoU thresholds** — 0.7 (cars) / 0.5 (pedestrians, cyclists)
+
+---
+
+## 4. Inference Workflow
+
+### Running Inference
+
+1. Select the trained model checkpoint (e.g., `checkpoint_epoch_80.pth`)
+2. Choose the corresponding model config file used during training
+3. Run the inference command
+
+### Inference Command
+
+```bash
+python demo.py \
+    --cfg_file cfgs/kitti_models/pv_rcnn.yaml \
+    --ckpt output/kitti_models/pv_rcnn/default/ckpt/checkpoint_epoch_80.pth \
+    --data_path data/kitti/training/velodyne/000008.bin
+```
+
+### Visualization
+
+Visualize results using **Open3D** or **Matplotlib** (requires GPU).
+
+<Callout type="note">
+Google Colab does not directly support 3D visualization. If your local system has a GPU, you can run the code and visualize the 3D output directly on your machine.
+</Callout>
+
+---
+
+## 5. Testing Pipeline
+
+### Testing Command
+
+```bash
+python test.py \
+    --cfg_file cfgs/kitti_models/pv_rcnn.yaml \
+    --batch_size 4 \
+    --ckpt output/kitti_models/pv_rcnn/default/ckpt/checkpoint_epoch_80.pth
+```
+
+Predictions are saved in the `output/` folder.
+
+---
+
+## 6. Important Notes
+
+- Always keep **CUDA, PyTorch, and spconv versions compatible**
+- **File naming and folder structure are critical** for the framework to work correctly
+- **GPU is mandatory** for training, inference, and 3D visualization
+
+---
+
+## 7. Example Results
+
+### Sample Input (RGB Image)
+
+<img src="./images/sample-input.png" alt="Sample Input - Street Scene with Vehicles" />
+
+### Detection Output (3D Point Cloud with Bounding Boxes)
+
+<img src="./images/detection-output.png" alt="3D Object Detection Output showing detected vehicles with bounding boxes" />
+
+The output shows the LiDAR point cloud with predicted 3D bounding boxes around detected objects. Different colors represent different object classes or confidence levels.
