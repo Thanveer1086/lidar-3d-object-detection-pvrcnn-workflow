@@ -12,6 +12,23 @@ import { Callout } from 'fumadocs-ui/components/callout';
   </div>
 </div>
 
+<div className="p-6 rounded-lg bg-gradient-to-r from-orange-500/20 to-yellow-500/20 border border-orange-500/50 my-6">
+  <div className="flex items-center gap-4">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/Google_Colaboratory_SVG_Logo.svg" alt="Colab" className="w-12 h-12"/>
+    <div>
+      <div className="font-bold text-orange-400 text-lg">Run This Tutorial</div>
+      <div className="text-muted-foreground text-sm mb-2">Complete code with GPU runtime</div>
+      <a 
+        href="https://colab.research.google.com/drive/1dajcVpGUwIOTVGQX2VYMSeKOP-GLn4gv?usp=sharing" 
+        target="_blank"
+        className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold rounded-lg"
+      >
+        🚀 Open Notebook
+      </a>
+    </div>
+  </div>
+</div>
+
 ## For Non-Technical People
 
 <Callout type="info">
@@ -85,7 +102,7 @@ import { Callout } from 'fumadocs-ui/components/callout';
 
 <Callout type="info">Examples </Callout>
 
-<img src="/images/version-compatibility.svg" alt="LiDAR Workflow Overview" className="w-full rounded-lg my-6" />
+<img src="/images/version-compatibility.svg" alt="Version Compatibility Matrix" className="w-full rounded-lg my-6" />
 
 <Callout type="warn">
   **Critical Compatibility Notes:**
@@ -174,7 +191,7 @@ Download from the [KITTI Dataset Page](https://www.cvlibs.net/datasets/kitti/eva
 
 ### Data Download Flow
 
-<img src="/images/data-download-flow.svg" alt="LiDAR Workflow Overview" className="w-full rounded-lg my-6" />
+<img src="/images/data-download-flow.svg" alt="Data Download Flow" className="w-full rounded-lg my-6" />
 
 ### Required Folder Structure
 
@@ -291,7 +308,7 @@ python -m pcdet.datasets.kitti.kitti_dataset create_kitti_infos \
 
 ### Model Architecture Comparison
 
-<img src="/images/model-architecture.svg" alt="LiDAR Workflow Overview" className="w-full rounded-lg my-6" />
+<img src="/images/model-architecture.svg" alt="Model Architecture" className="w-full rounded-lg my-6" />
 
 ### Model Selection Guide
 
@@ -339,7 +356,7 @@ python -m pcdet.datasets.kitti.kitti_dataset create_kitti_infos \
 
 ### Training Workflow Diagram
 
-<img src="/images/training-workflow.svg" alt="LiDAR Workflow Overview" className="w-full rounded-lg my-6" />
+<img src="/images/training-workflow.svg" alt="Training Workflow" className="w-full rounded-lg my-6" />
 
 ### Training Commands
 
@@ -384,7 +401,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 python -m torch.distributed.launch \
 
 ### Loss Functions
 
-<img src="/images/loss-functions.svg" alt="LiDAR Workflow Overview" className="w-full rounded-lg my-6" />
+<img src="/images/loss-functions.svg" alt="Loss Functions" className="w-full rounded-lg my-6" />
 
 
 ### Evaluation Metrics

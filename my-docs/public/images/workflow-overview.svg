@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500">
   <defs>
     <linearGradient id="inputGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#1e3a5f;stop-opacity:1" />
@@ -8,132 +8,148 @@
       <stop offset="0%" style="stop-color:#064e3b;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
     </linearGradient>
-    <linearGradient id="modelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="modelOutputGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#4c1d95;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
-    </linearGradient>
-    <linearGradient id="outputGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#78350f;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
     </linearGradient>
     <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
       <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.3"/>
     </filter>
-  </defs>
-  
-  <!-- Background -->
-  <rect width="1000" height="600" fill="#0f172a"/>
-  
-  <!-- INPUT STAGE -->
-  <rect x="20" y="20" width="220" height="260" rx="15" fill="url(#inputGrad)" filter="url(#shadow)" stroke="#3b82f6" stroke-width="2"/>
-  <text x="130" y="50" text-anchor="middle" fill="#93c5fd" font-family="Arial, sans-serif" font-size="14" font-weight="bold">📥 INPUT STAGE</text>
-  
-  <circle cx="80" cy="95" r="25" fill="#1e40af" stroke="#60a5fa" stroke-width="2"/>
-  <text x="80" y="100" text-anchor="middle" fill="#fff" font-size="16">🔦</text>
-  <text x="150" y="95" fill="#bfdbfe" font-family="Arial, sans-serif" font-size="11">LiDAR Sensor</text>
-  
-  <circle cx="80" cy="160" r="25" fill="#1e40af" stroke="#60a5fa" stroke-width="2"/>
-  <text x="80" y="165" text-anchor="middle" fill="#fff" font-size="16">📷</text>
-  <text x="150" y="160" fill="#bfdbfe" font-family="Arial, sans-serif" font-size="11">Camera</text>
-  
-  <circle cx="80" cy="225" r="25" fill="#1e40af" stroke="#60a5fa" stroke-width="2"/>
-  <text x="80" y="230" text-anchor="middle" fill="#fff" font-size="16">📐</text>
-  <text x="150" y="225" fill="#bfdbfe" font-family="Arial, sans-serif" font-size="11">Calibration</text>
-  
-  <!-- Arrow 1 -->
-  <path d="M 245 150 L 275 150" stroke="#3b82f6" stroke-width="3" fill="none" marker-end="url(#arrowBlue)"/>
-  <defs>
+    <!-- Arrow Markers -->
     <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L0,6 L9,3 z" fill="#3b82f6"/>
     </marker>
-  </defs>
-  
-  <!-- DATA PREPARATION -->
-  <rect x="280" y="20" width="220" height="260" rx="15" fill="url(#prepGrad)" filter="url(#shadow)" stroke="#10b981" stroke-width="2"/>
-  <text x="390" y="50" text-anchor="middle" fill="#a7f3d0" font-family="Arial, sans-serif" font-size="14" font-weight="bold">🔧 DATA PREPARATION</text>
-  
-  <rect x="310" y="70" width="160" height="40" rx="8" fill="#065f46" stroke="#34d399" stroke-width="1"/>
-  <text x="390" y="95" text-anchor="middle" fill="#d1fae5" font-family="Arial, sans-serif" font-size="11">KITTI Format Organization</text>
-  
-  <rect x="310" y="130" width="160" height="55" rx="8" fill="#065f46" stroke="#34d399" stroke-width="1"/>
-  <text x="390" y="150" text-anchor="middle" fill="#d1fae5" font-family="Arial, sans-serif" font-size="11">Data Augmentation</text>
-  <text x="390" y="165" text-anchor="middle" fill="#6ee7b7" font-family="Arial, sans-serif" font-size="9">• Random Flip • Rotation</text>
-  <text x="390" y="178" text-anchor="middle" fill="#6ee7b7" font-family="Arial, sans-serif" font-size="9">• Scaling • GT Sampling</text>
-  
-  <rect x="310" y="200" width="160" height="40" rx="8" fill="#065f46" stroke="#34d399" stroke-width="1"/>
-  <text x="390" y="225" text-anchor="middle" fill="#d1fae5" font-family="Arial, sans-serif" font-size="11">Voxelization / Pillars</text>
-  
-  <!-- Arrow 2 -->
-  <path d="M 505 150 L 535 150" stroke="#10b981" stroke-width="3" fill="none" marker-end="url(#arrowGreen)"/>
-  <defs>
     <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L0,6 L9,3 z" fill="#10b981"/>
     </marker>
-  </defs>
-  
-  <!-- MODEL ARCHITECTURE -->
-  <rect x="540" y="20" width="220" height="260" rx="15" fill="url(#modelGrad)" filter="url(#shadow)" stroke="#a855f7" stroke-width="2"/>
-  <text x="650" y="50" text-anchor="middle" fill="#e9d5ff" font-family="Arial, sans-serif" font-size="14" font-weight="bold">🧠 MODEL ARCHITECTURE</text>
-  
-  <rect x="570" y="70" width="160" height="40" rx="8" fill="#581c87" stroke="#c084fc" stroke-width="1"/>
-  <text x="650" y="95" text-anchor="middle" fill="#f3e8ff" font-family="Arial, sans-serif" font-size="11">3D Backbone (Sparse Conv)</text>
-  
-  <rect x="570" y="130" width="160" height="40" rx="8" fill="#581c87" stroke="#c084fc" stroke-width="1"/>
-  <text x="650" y="155" text-anchor="middle" fill="#f3e8ff" font-family="Arial, sans-serif" font-size="11">2D Backbone (BEV)</text>
-  
-  <rect x="570" y="190" width="160" height="40" rx="8" fill="#581c87" stroke="#c084fc" stroke-width="1"/>
-  <text x="650" y="215" text-anchor="middle" fill="#f3e8ff" font-family="Arial, sans-serif" font-size="11">Detection Head (RPN+RCNN)</text>
-  
-  <!-- Arrow 3 -->
-  <path d="M 765 150 L 795 150" stroke="#a855f7" stroke-width="3" fill="none" marker-end="url(#arrowPurple)"/>
-  <defs>
     <marker id="arrowPurple" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
       <path d="M0,0 L0,6 L9,3 z" fill="#a855f7"/>
     </marker>
+    <marker id="arrowOrange" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#f59e0b"/>
+    </marker>
+    <marker id="arrowWhite" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#fff"/>
+    </marker>
   </defs>
   
-  <!-- OUTPUT STAGE -->
-  <rect x="760" y="20" width="220" height="260" rx="15" fill="url(#outputGrad)" filter="url(#shadow)" stroke="#f59e0b" stroke-width="2"/>
-  <text x="870" y="50" text-anchor="middle" fill="#fef3c7" font-family="Arial, sans-serif" font-size="14" font-weight="bold">📤 OUTPUT STAGE</text>
-  
-  <rect x="790" y="70" width="160" height="35" rx="8" fill="#92400e" stroke="#fbbf24" stroke-width="1"/>
-  <text x="870" y="92" text-anchor="middle" fill="#fef9c3" font-family="Arial, sans-serif" font-size="11">3D Bounding Boxes</text>
-  
-  <rect x="790" y="120" width="160" height="50" rx="8" fill="#92400e" stroke="#fbbf24" stroke-width="1"/>
-  <text x="870" y="140" text-anchor="middle" fill="#fef9c3" font-family="Arial, sans-serif" font-size="11">Class Labels</text>
-  <text x="870" y="158" text-anchor="middle" fill="#fcd34d" font-family="Arial, sans-serif" font-size="9">Car • Pedestrian • Cyclist</text>
-  
-  <rect x="790" y="185" width="160" height="35" rx="8" fill="#92400e" stroke="#fbbf24" stroke-width="1"/>
-  <text x="870" y="207" text-anchor="middle" fill="#fef9c3" font-family="Arial, sans-serif" font-size="11">Confidence Scores</text>
-  
-  <rect x="815" y="235" width="110" height="35" rx="10" fill="#f59e0b" stroke="#fbbf24" stroke-width="2"/>
-  <text x="870" y="258" text-anchor="middle" fill="#1f2937" font-family="Arial, sans-serif" font-size="12" font-weight="bold">🎯 Detection</text>
-  
-  <!-- Vertical Arrows -->
-  <path d="M 390 110 L 390 130" stroke="#34d399" stroke-width="2" fill="none"/>
-  <path d="M 390 185 L 390 200" stroke="#34d399" stroke-width="2" fill="none"/>
-  <path d="M 650 110 L 650 130" stroke="#c084fc" stroke-width="2" fill="none"/>
-  <path d="M 650 170 L 650 190" stroke="#c084fc" stroke-width="2" fill="none"/>
-  <path d="M 870 105 L 870 120" stroke="#fbbf24" stroke-width="2" fill="none"/>
-  <path d="M 870 170 L 870 185" stroke="#fbbf24" stroke-width="2" fill="none"/>
-  <path d="M 870 220 L 870 235" stroke="#fbbf24" stroke-width="2" fill="none"/>
+  <!-- Background -->
+  <rect width="1000" height="500" fill="#0f172a"/>
   
   <!-- Title -->
-  <text x="500" y="320" text-anchor="middle" fill="#f8fafc" font-family="Arial, sans-serif" font-size="20" font-weight="bold">LiDAR 3D Object Detection Pipeline</text>
+  <text x="500" y="30" text-anchor="middle" fill="#f8fafc" font-family="Arial, sans-serif" font-size="20" font-weight="bold">LiDAR 3D Object Detection Pipeline</text>
+  
+  <!-- INPUT STAGE -->
+  <rect x="20" y="50" width="200" height="240" rx="15" fill="url(#inputGrad)" filter="url(#shadow)" stroke="#3b82f6" stroke-width="2"/>
+  <text x="120" y="80" text-anchor="middle" fill="#93c5fd" font-family="Arial, sans-serif" font-size="14" font-weight="bold">📥 INPUT STAGE</text>
+  
+  <circle cx="75" cy="125" r="22" fill="#1e40af" stroke="#60a5fa" stroke-width="2"/>
+  <text x="75" y="130" text-anchor="middle" fill="#fff" font-size="14">🔦</text>
+  <text x="140" y="125" fill="#bfdbfe" font-family="Arial, sans-serif" font-size="10">LiDAR Sensor</text>
+  
+  <circle cx="75" cy="180" r="22" fill="#1e40af" stroke="#60a5fa" stroke-width="2"/>
+  <text x="75" y="185" text-anchor="middle" fill="#fff" font-size="14">📷</text>
+  <text x="140" y="180" fill="#bfdbfe" font-family="Arial, sans-serif" font-size="10">Camera</text>
+  
+  <circle cx="75" cy="235" r="22" fill="#1e40af" stroke="#60a5fa" stroke-width="2"/>
+  <text x="75" y="240" text-anchor="middle" fill="#fff" font-size="14">📐</text>
+  <text x="140" y="235" fill="#bfdbfe" font-family="Arial, sans-serif" font-size="10">Calibration</text>
+  
+  <!-- Arrow 1: Input to Prep -->
+  <path d="M 225 170 L 255 170" stroke="#3b82f6" stroke-width="3" fill="none" marker-end="url(#arrowBlue)"/>
+  
+  <!-- DATA PREPARATION -->
+  <rect x="260" y="50" width="200" height="240" rx="15" fill="url(#prepGrad)" filter="url(#shadow)" stroke="#10b981" stroke-width="2"/>
+  <text x="360" y="80" text-anchor="middle" fill="#a7f3d0" font-family="Arial, sans-serif" font-size="14" font-weight="bold">🔧 DATA PREP</text>
+  
+  <rect x="285" y="100" width="150" height="35" rx="8" fill="#065f46" stroke="#34d399" stroke-width="1"/>
+  <text x="360" y="123" text-anchor="middle" fill="#d1fae5" font-family="Arial, sans-serif" font-size="10">KITTI Format</text>
+  
+  <!-- Arrow down -->
+  <path d="M 360 135 L 360 150" stroke="#34d399" stroke-width="2" fill="none" marker-end="url(#arrowGreen)"/>
+  
+  <rect x="285" y="155" width="150" height="45" rx="8" fill="#065f46" stroke="#34d399" stroke-width="1"/>
+  <text x="360" y="175" text-anchor="middle" fill="#d1fae5" font-family="Arial, sans-serif" font-size="10">Data Augmentation</text>
+  <text x="360" y="190" text-anchor="middle" fill="#6ee7b7" font-family="Arial, sans-serif" font-size="8">Flip • Rotation • Scale</text>
+  
+  <!-- Arrow down -->
+  <path d="M 360 200 L 360 215" stroke="#34d399" stroke-width="2" fill="none" marker-end="url(#arrowGreen)"/>
+  
+  <rect x="285" y="220" width="150" height="35" rx="8" fill="#065f46" stroke="#34d399" stroke-width="1"/>
+  <text x="360" y="243" text-anchor="middle" fill="#d1fae5" font-family="Arial, sans-serif" font-size="10">Voxelization</text>
+  
+  <!-- Arrow 2: Prep to Model+Output -->
+  <path d="M 465 170 L 495 170" stroke="#10b981" stroke-width="3" fill="none" marker-end="url(#arrowGreen)"/>
+  
+  <!-- MERGED MODEL + OUTPUT STAGE -->
+  <rect x="500" y="50" width="480" height="240" rx="15" fill="#1e1b4b" filter="url(#shadow)" stroke="#8b5cf6" stroke-width="2"/>
+  
+  <!-- Header gradient bar -->
+  <rect x="500" y="50" width="480" height="40" rx="15" fill="url(#modelOutputGrad)"/>
+  <text x="740" y="77" text-anchor="middle" fill="#fff" font-family="Arial, sans-serif" font-size="14" font-weight="bold">🧠 MODEL ARCHITECTURE → 📤 OUTPUT</text>
+  
+  <!-- Model Section -->
+  <rect x="520" y="105" width="140" height="35" rx="8" fill="#581c87" stroke="#c084fc" stroke-width="1"/>
+  <text x="590" y="128" text-anchor="middle" fill="#f3e8ff" font-family="Arial, sans-serif" font-size="10">3D Backbone</text>
+  
+  <!-- Arrow down -->
+  <path d="M 590 140 L 590 155" stroke="#c084fc" stroke-width="2" fill="none" marker-end="url(#arrowPurple)"/>
+  
+  <rect x="520" y="160" width="140" height="35" rx="8" fill="#581c87" stroke="#c084fc" stroke-width="1"/>
+  <text x="590" y="183" text-anchor="middle" fill="#f3e8ff" font-family="Arial, sans-serif" font-size="10">2D Backbone (BEV)</text>
+  
+  <!-- Arrow down -->
+  <path d="M 590 195 L 590 210" stroke="#c084fc" stroke-width="2" fill="none" marker-end="url(#arrowPurple)"/>
+  
+  <rect x="520" y="215" width="140" height="35" rx="8" fill="#581c87" stroke="#c084fc" stroke-width="1"/>
+  <text x="590" y="238" text-anchor="middle" fill="#f3e8ff" font-family="Arial, sans-serif" font-size="10">Detection Head</text>
+  
+  <!-- Arrow: Model to Output (horizontal) -->
+  <path d="M 665 175 L 710 175" stroke="#fff" stroke-width="3" fill="none" marker-end="url(#arrowWhite)"/>
+  
+  <!-- Output Section -->
+  <rect x="720" y="105" width="130" height="35" rx="8" fill="#92400e" stroke="#fbbf24" stroke-width="1"/>
+  <text x="785" y="128" text-anchor="middle" fill="#fef9c3" font-family="Arial, sans-serif" font-size="10">3D Bounding Boxes</text>
+  
+  <!-- Arrow down -->
+  <path d="M 785 140 L 785 155" stroke="#fbbf24" stroke-width="2" fill="none" marker-end="url(#arrowOrange)"/>
+  
+  <rect x="720" y="160" width="130" height="35" rx="8" fill="#92400e" stroke="#fbbf24" stroke-width="1"/>
+  <text x="785" y="183" text-anchor="middle" fill="#fef9c3" font-family="Arial, sans-serif" font-size="10">Class Labels</text>
+  
+  <!-- Arrow down -->
+  <path d="M 785 195 L 785 210" stroke="#fbbf24" stroke-width="2" fill="none" marker-end="url(#arrowOrange)"/>
+  
+  <rect x="720" y="215" width="130" height="35" rx="8" fill="#92400e" stroke="#fbbf24" stroke-width="1"/>
+  <text x="785" y="238" text-anchor="middle" fill="#fef9c3" font-family="Arial, sans-serif" font-size="10">Confidence Scores</text>
+  
+  <!-- Arrow to Final Detection -->
+  <path d="M 855 175 L 890 175" stroke="#fbbf24" stroke-width="2" fill="none" marker-end="url(#arrowOrange)"/>
+  
+  <!-- Final Detection Box -->
+  <rect x="895" y="130" width="70" height="90" rx="10" fill="#f59e0b" stroke="#fde047" stroke-width="2"/>
+  <text x="930" y="170" text-anchor="middle" fill="#1f2937" font-family="Arial, sans-serif" font-size="11" font-weight="bold">🎯</text>
+  <text x="930" y="190" text-anchor="middle" fill="#1f2937" font-family="Arial, sans-serif" font-size="9" font-weight="bold">Final</text>
+  <text x="930" y="205" text-anchor="middle" fill="#1f2937" font-family="Arial, sans-serif" font-size="9" font-weight="bold">Detection</text>
+  
+  <!-- Connecting lines inside merged box -->
+  <path d="M 590 250 L 590 265 L 720 265 L 720 250" stroke="#8b5cf6" stroke-width="1" stroke-dasharray="4,2" fill="none"/>
   
   <!-- Legend -->
-  <rect x="200" y="350" width="600" height="80" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1"/>
-  <text x="500" y="375" text-anchor="middle" fill="#94a3b8" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Pipeline Stages</text>
+  <rect x="200" y="320" width="600" height="70" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="500" y="345" text-anchor="middle" fill="#94a3b8" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Pipeline Stages</text>
   
-  <rect x="230" y="395" width="15" height="15" rx="3" fill="#3b82f6"/>
-  <text x="255" y="407" fill="#cbd5e1" font-family="Arial, sans-serif" font-size="11">Input</text>
+  <rect x="230" y="360" width="15" height="15" rx="3" fill="#3b82f6"/>
+  <text x="255" y="372" fill="#cbd5e1" font-family="Arial, sans-serif" font-size="11">Input</text>
   
-  <rect x="330" y="395" width="15" height="15" rx="3" fill="#10b981"/>
-  <text x="355" y="407" fill="#cbd5e1" font-family="Arial, sans-serif" font-size="11">Preparation</text>
+  <rect x="330" y="360" width="15" height="15" rx="3" fill="#10b981"/>
+  <text x="355" y="372" fill="#cbd5e1" font-family="Arial, sans-serif" font-size="11">Preparation</text>
   
-  <rect x="470" y="395" width="15" height="15" rx="3" fill="#a855f7"/>
-  <text x="495" y="407" fill="#cbd5e1" font-family="Arial, sans-serif" font-size="11">Model</text>
+  <rect x="470" y="360" width="15" height="15" rx="3" fill="#a855f7"/>
+  <text x="495" y="372" fill="#cbd5e1" font-family="Arial, sans-serif" font-size="11">Model</text>
   
-  <rect x="580" y="395" width="15" height="15" rx="3" fill="#f59e0b"/>
-  <text x="605" y="407" fill="#cbd5e1" font-family="Arial, sans-serif" font-size="11">Output</text>
+  <rect x="580" y="360" width="15" height="15" rx="3" fill="#f59e0b"/>
+  <text x="605" y="372" fill="#cbd5e1" font-family="Arial, sans-serif" font-size="11">Output</text>
+  
+  <text x="700" y="372" fill="#cbd5e1" font-family="Arial, sans-serif" font-size="11">→ = Data Flow</text>
 </svg>
